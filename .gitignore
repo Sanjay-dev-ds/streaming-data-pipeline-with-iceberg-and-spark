@@ -1,0 +1,7 @@
+/etl_server_venv
+gps_tracking.log
+.idea
+*.hcl
+*.terraform
+*.tfstate
+*.tfstate.*
