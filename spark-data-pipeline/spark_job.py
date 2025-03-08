@@ -12,7 +12,6 @@ import logging
 
 # Set up logging
 logging.basicConfig(
-    # filename="../gps_tracking.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
@@ -24,9 +23,9 @@ def load_data_to_iceberg(spark,
                          database_name,
                          table_name,
                          partition_cols=None,
-                         table_type='COW',
                          sql_query=None,
-                         compression='zst'):
+                         compression='snappy'):
+
     full_table_name = f"{catalog_name}.{database_name}.{table_name}"
     try:
         if sql_query is not None:
@@ -47,20 +46,10 @@ def load_data_to_iceberg(spark,
 
         writer = transformed_df.write.format("iceberg")
 
-        # Set table properties based on table type
-        if table_type.upper() == 'COW':
-            writer = writer.option("write.format.default", "parquet")
-            writer = writer.option("write.delete.mode", "copy-on-write")
-            writer = writer.option("write.update.mode", "copy-on-write")
-            writer = writer.option("write.merge.mode", "copy-on-write")
-        elif table_type.upper() == 'MOR':
-            writer = writer.option("write.format.default", "parquet")
-            writer = writer.option("write.delete.mode", "merge-on-read")
-            writer = writer.option("write.update.mode", "merge-on-read")
-            writer = writer.option("write.merge.mode", "merge-on-read")
-        else:
-            raise ValueError("Invalid table_type. Must be 'COW' or 'MOR'.")
-
+        writer = writer.option("write.format.default", "parquet")
+        writer = writer.option("write.delete.mode", "copy-on-write")
+        writer = writer.option("write.update.mode", "copy-on-write")
+        writer = writer.option("write.merge.mode", "copy-on-write")
         # Set compression codec
         writer = writer.option("write.parquet.compression-codec", compression)
 
@@ -83,8 +72,7 @@ def load_data_to_iceberg(spark,
 
     except Exception as e:
         print(f"Error loading data to Iceberg: {str(e)}")
-        return False  # Return False on failure
-
+        raise e
 
 
 def process_message( messages,
@@ -93,15 +81,23 @@ def process_message( messages,
                      namespace,
                      table_name,
                      partition_cols=None,
-                     table_type='COW',
                      sql_query=None,
-                     compression='zst'):
+                     compression='snappy'):
     try:
         batch_files = []
 
         for message in messages:
             payload = json.loads(message['Body'])
-            records = payload['Records']
+            # Use .get() to safely access 'Records' and provide a default empty list
+            records = payload.get('Records', [])
+
+            if records:  # Process only if records exist
+                for record in records:
+                    # Process each record
+                    print(record)
+            else:
+                print("No records found in payload, skipping message.")
+                continue
             protocol = "s3a"
 
             if protocol == "s3a":
@@ -123,13 +119,9 @@ def process_message( messages,
                                  namespace,
                                  table_name,
                                  partition_cols=partition_cols,
-                                 table_type=table_type,
                                  sql_query=sql_query,
                                  compression=compression
                                  )
-
-
-
 
 
     except Exception as e:
@@ -165,6 +157,7 @@ def main():
     table_name = "gps_tracking_table"
     s3_bucket_arn = "s3://gps-tracking-data-bucket-02122025-sanjay-de/warehouse/"
     sqs_url = "https://sqs.us-east-1.amazonaws.com/058264127733/s3_event_queue"
+    # partition_cols = "direction","seat_belt_status"
     partition_cols = None
     compression = "snappy"
     sql_query = """
@@ -176,14 +169,12 @@ def main():
         FROM 
         temp_view
     """
-    table_type = 'COW'
 
     poller = Poller(sqs_url)
 
 
     spark = create_spark_session(catalog_name=catalog_name, namespace=namespace,
                                  s3_bucket_arn=s3_bucket_arn)
-
 
     while True:
         messages = poller.get_messages(10)
@@ -194,15 +185,12 @@ def main():
                         namespace,
                         table_name,
                         partition_cols,
-                        table_type,
                         sql_query,
                         compression
                         )
-
         poller.commit()
         logging.info(f"Waiting 10 seconds before next poll")
         time.sleep(10)
-
 
 if __name__ == "__main__":
     main()
