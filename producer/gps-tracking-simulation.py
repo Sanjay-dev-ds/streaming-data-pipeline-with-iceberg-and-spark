@@ -8,6 +8,7 @@ import json
 import logging
 import boto3
 from faker import Faker
+from utility.cloudwatch_logger import log_exception
 
 # Set up logging
 logging.basicConfig(
@@ -87,7 +88,10 @@ if __name__ == "__main__":
 
     print("Streaming GPS data to AWS Kinesis...\n")
 
-    while True:
-        gps_update = generate_gps_data()
-        gps_streamer.push_to_kinesis(gps_update)
-        time.sleep(3)
+    try :
+        while True:
+            gps_update = generate_gps_data()
+            gps_streamer.push_to_kinesis(gps_update)
+            time.sleep(3)
+    except Exception :
+        log_exception()
