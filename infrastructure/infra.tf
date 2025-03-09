@@ -120,138 +120,143 @@ provider "aws" {
 
 
 
-# # EC2 Instance for Spark processing
-# resource "aws_instance" "spark_ec2_server" {
-#   ami           = "ami-04b4f1a9cf54c11d0"  #ubuntu AMI
-#   instance_type = "t2.medium"
-#
-#   # Specify the VPC Security Group and Subnet
-#   vpc_security_group_ids = ["sg-0236b184f828d82d9"]
-#   subnet_id             = "subnet-03270c3fdf727a8be"
-#
-#   # Specify your key pair for SSH access
-#   key_name = "sanjay-2025"
-#
-#   iam_instance_profile = aws_iam_instance_profile.spark_role_profile.name
-#
-#   user_data = <<-EOF
-#               #!/bin/bash
-#               # Sleep for 30 seconds to ensure the system is ready
-#               sleep 30
-#
-#               # Update package lists and install packages non-interactively
-#               echo "Updating packages..." >> /tmp/user_data.log
-#               export DEBIAN_FRONTEND=noninteractive
-#               sudo apt update -y >> /tmp/user_data.log 2>&1
-#               echo "Installing Java..." >> /tmp/user_data.log
-#               sudo apt install -y default-jdk >> /tmp/user_data.log 2>&1
-#
-#               # Download and install Spark
-#               echo "Downloading and installing Spark..." >> /tmp/user_data.log
-#               wget https://dlcdn.apache.org/spark/spark-3.5.4/spark-3.5.4-bin-hadoop3.tgz >> /tmp/user_data.log 2>&1
-#               tar xvf spark-3.5.4-bin-hadoop3.tgz >> /tmp/user_data.log 2>&1
-#               sudo mv spark-3.5.4-bin-hadoop3 /opt/spark
-#
-#               # Set Spark environment variables
-#               echo "export SPARK_HOME=/opt/spark" | sudo tee -a /home/ubuntu/.bashrc
-#               echo "export PATH=\$PATH:\$SPARK_HOME/bin" | sudo tee -a /home/ubuntu/.bashrc
-#
-#               # Install Python 3.12 and create virtual environment
-#               echo "Installing Python and setting up virtual environment..." >> /tmp/user_data.log
-#               sudo apt install -y python3.12-venv >> /tmp/user_data.log 2>&1
-#               python3 -m venv /home/ubuntu/etl_server_venv
-#               source /home/ubuntu/etl_server_venv/bin/activate
-#
-#               # Install Python dependencies
-#               echo "Installing Python dependencies..." >> /tmp/user_data.log
-#               echo "
-#               pandas
-#               faker
-#               boto3
-#               pyarrow
-#               pyspark
-#               pyspark[sql]" > /home/ubuntu/requirements.txt
-#               pip install -r /home/ubuntu/requirements.txt >> /tmp/user_data.log 2>&1
-#               EOF
-#
-#   tags = {
-#     Name = "spark-processing-instance"
-#   }
-#
-#   availability_zone = "us-east-1a"
-# }
-#
-#
-# # IAM Role for EC2 to access S3, SQS, and CloudWatch
-# resource "aws_iam_role" "spark_role" {
-#   name = "spark-processing-role"
-#   assume_role_policy = jsonencode({
-#     Statement = [{
-#       Action = "sts:AssumeRole"
-#       Effect = "Allow"
-#       Principal = { Service = "ec2.amazonaws.com" }
-#     }]
-#   })
-# }
-#
-# resource "aws_iam_role_policy_attachment" "spark_s3_access" {
-#   role       = aws_iam_role.spark_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-# }
-#
-# resource "aws_iam_role_policy_attachment" "spark_sqs_access" {
-#   role       = aws_iam_role.spark_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
-# }
-#
-# resource "aws_iam_role_policy_attachment" "spark_cloudwatch_access" {
-#   role       = aws_iam_role.spark_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
-# }
-#
-# resource "aws_iam_instance_profile" "spark_role_profile" {
-#   name = "spark-instance-profile"
-#   role = aws_iam_role.spark_role.name
-# }
-#
-# # CloudWatch Log Group
-# resource "aws_cloudwatch_log_group" "spark_logs" {
-#   name = "/aws/spark/iceberg-errors"
-# }
-#
-# # CloudWatch Metric Filter for Errors
-# resource "aws_cloudwatch_log_metric_filter" "spark_error_filter" {
-#   name           = "SparkErrorFilter"
-#   log_group_name = aws_cloudwatch_log_group.spark_logs.name
-#   pattern        = "Error processing Spark job"
-#   metric_transformation {
-#     name      = "SparkErrors"
-#     namespace = "SparkJobs"
-#     value     = "1"
-#   }
-# }
-#
-# # CloudWatch Alarm for Spark Failures
-# resource "aws_cloudwatch_metric_alarm" "spark_error_alarm" {
-#   alarm_name          = "SparkProcessingFailures"
-#   metric_name        = "SparkErrors"
-#   namespace          = "SparkJobs"
-#   statistic          = "Sum"
-#   period             = 300
-#   evaluation_periods = 1
-#   threshold          = 1
-#   comparison_operator = "GreaterThanOrEqualToThreshold"
-#   alarm_actions      = [aws_sns_topic.spark_alerts.arn]
-# }
-#
-# # SNS Topic for error notifications
-# resource "aws_sns_topic" "spark_alerts" {
-#   name = "Spark-Processing-Alerts"
-# }
-#
-# # SNS Topic Subscription (Email)
-# resource "aws_sns_topic_subscription" "spark_alert_subscription" {
-#   topic_arn = aws_sns_topic.spark_alerts.arn
-#   protocol  = "email"
-#   endpoint  = "sanjay28.js@gmail.com"  # Replace with your email
-# }
+  # EC2 Instance for Spark processing
+  resource "aws_instance" "spark_ec2_server" {
+    ami           = "ami-04b4f1a9cf54c11d0"  #ubuntu AMI
+    instance_type = "t2.medium"
+
+    # Specify the VPC Security Group and Subnet
+    vpc_security_group_ids = ["sg-0236b184f828d82d9"]
+    subnet_id             = "subnet-08e7eaea53b7e7a87"
+
+    # Specify your key pair for SSH access
+    key_name = "sanjay-2025"
+
+    iam_instance_profile = aws_iam_instance_profile.spark_role_profile.name
+
+    user_data = <<-EOF
+                #!/bin/bash
+                # Sleep for 60 seconds to ensure the system is ready
+                sleep 60
+
+                # Update package lists and install packages non-interactively
+                echo "Updating packages..." >> /tmp/user_data.log
+                export DEBIAN_FRONTEND=noninteractive
+                sudo apt update -y >> /tmp/user_data.log 2>&1
+                echo "Installing Java..." >> /tmp/user_data.log
+                sudo apt install -y default-jdk >> /tmp/user_data.log 2>&1
+
+                # Download and install Spark
+                echo "Downloading and installing Spark..." >> /tmp/user_data.log
+                wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz >> /tmp/user_data.log 2>&1
+                tar xvf spark-3.5.5-bin-hadoop3.tgz >> /tmp/user_data.log 2>&1
+                sudo mv spark-3.5.5-bin-hadoop3 /opt/spark
+
+                # Set Spark environment variables
+                echo "export SPARK_HOME=/opt/spark" | sudo tee -a /home/ubuntu/.bashrc
+                echo "export PATH=\$PATH:\$SPARK_HOME/bin" | sudo tee -a /home/ubuntu/.bashrc
+
+                # Install Python 3.12 and create virtual environment
+                echo "Installing Python and setting up virtual environment..." >> /tmp/user_data.log
+                sudo apt install -y python3.12-venv >> /tmp/user_data.log 2>&1
+                python3 -m venv /home/ubuntu/etl_server_venv
+                source /home/ubuntu/etl_server_venv/bin/activate
+
+                # Install Python dependencies
+                echo "Installing Python dependencies..." >> /tmp/user_data.log
+                echo "
+                pandas
+                faker
+                boto3
+                pyarrow
+                pyspark
+                pyspark[sql]" > /home/ubuntu/requirements.txt
+                pip install -r /home/ubuntu/requirements.txt >> /tmp/user_data.log 2>&1
+                EOF
+
+    tags = {
+      Name = "spark-processing-instance"
+    }
+
+    availability_zone = "us-east-1b"
+  }
+
+
+  # IAM Role for EC2 to access S3, SQS, and CloudWatch
+  resource "aws_iam_role" "spark_role" {
+    name = "spark-processing-role"
+    assume_role_policy = jsonencode({
+      Statement = [{
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = { Service = "ec2.amazonaws.com" }
+      }]
+    })
+  }
+
+  resource "aws_iam_role_policy_attachment" "spark_s3_access" {
+    role       = aws_iam_role.spark_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  }
+
+  resource "aws_iam_role_policy_attachment" "spark_kinesis_access" {
+    role       = aws_iam_role.spark_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
+  }
+
+  resource "aws_iam_role_policy_attachment" "spark_sqs_access" {
+    role       = aws_iam_role.spark_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+  }
+
+  resource "aws_iam_role_policy_attachment" "spark_cloudwatch_access" {
+    role       = aws_iam_role.spark_role.name
+    policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  }
+
+  resource "aws_iam_instance_profile" "spark_role_profile" {
+    name = "spark-instance-profile"
+    role = aws_iam_role.spark_role.name
+  }
+
+  # CloudWatch Log Group
+  resource "aws_cloudwatch_log_group" "spark_logs" {
+    name = "/aws/spark/iceberg-errors"
+  }
+
+  # CloudWatch Metric Filter for Errors
+  resource "aws_cloudwatch_log_metric_filter" "spark_error_filter" {
+    name           = "SparkErrorFilter"
+    log_group_name = aws_cloudwatch_log_group.spark_logs.name
+    pattern        = "Error processing Spark job"
+    metric_transformation {
+      name      = "SparkErrors"
+      namespace = "SparkJobs"
+      value     = "1"
+    }
+  }
+
+  # CloudWatch Alarm for Spark Failures
+  resource "aws_cloudwatch_metric_alarm" "spark_error_alarm" {
+    alarm_name          = "SparkProcessingFailures"
+    metric_name        = "SparkErrors"
+    namespace          = "SparkJobs"
+    statistic          = "Sum"
+    period             = 300
+    evaluation_periods = 1
+    threshold          = 1
+    comparison_operator = "GreaterThanOrEqualToThreshold"
+    alarm_actions      = [aws_sns_topic.spark_alerts.arn]
+  }
+
+  # SNS Topic for error notifications
+  resource "aws_sns_topic" "spark_alerts" {
+    name = "Spark-Processing-Alerts"
+  }
+
+  # SNS Topic Subscription (Email)
+  resource "aws_sns_topic_subscription" "spark_alert_subscription" {
+    topic_arn = aws_sns_topic.spark_alerts.arn
+    protocol  = "email"
+    endpoint  = "sanjay28.js@gmail.com"  # Replace with your email
+  }
