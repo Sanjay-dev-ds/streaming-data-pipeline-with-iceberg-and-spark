@@ -93,5 +93,6 @@ if __name__ == "__main__":
             gps_update = generate_gps_data()
             gps_streamer.push_to_kinesis(gps_update)
             time.sleep(3)
-    except Exception :
-        log_exception()
+    except Exception as e :
+        print(e)
+        # log_exception()
