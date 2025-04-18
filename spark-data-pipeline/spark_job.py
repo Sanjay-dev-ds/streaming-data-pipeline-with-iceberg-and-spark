@@ -152,7 +152,7 @@ def create_spark_session(catalog_name, namespace, s3_bucket_arn, region="us-east
 
 def main():
     catalog_name = "glue_catalog"
-    namespace = "gps_glue_catalog"
+    namespace = "gps_glue_catalog_v2"
     table_name = "gps_tracking_table"
     s3_bucket_arn = "s3://gps-tracking-data-bucket-02122025-sanjay-de/warehouse/"
     sqs_url = "https://sqs.us-east-1.amazonaws.com/058264127733/s3_event_queue"
