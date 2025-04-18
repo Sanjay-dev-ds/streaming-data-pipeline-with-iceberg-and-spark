@@ -156,6 +156,10 @@ provider "aws" {
                 echo "export SPARK_HOME=/opt/spark" | sudo tee -a /home/ubuntu/.bashrc
                 echo "export PATH=\$PATH:\$SPARK_HOME/bin" | sudo tee -a /home/ubuntu/.bashrc
 
+                cd /home/ubuntu
+                git clone https://github.com/Sanjay-dev-ds/streaming-data-pipeline-with-iceberg-and-spark.git >> /tmp/user_data.log 2>&1
+                cd streaming-data-pipeline-with-iceberg-and-spark
+
                 # Install Python 3.12 and create virtual environment
                 echo "Installing Python and setting up virtual environment..." >> /tmp/user_data.log
                 sudo apt install -y python3.12-venv >> /tmp/user_data.log 2>&1
@@ -212,6 +216,11 @@ provider "aws" {
   resource "aws_iam_role_policy_attachment" "spark_cloudwatch_access" {
     role       = aws_iam_role.spark_role.name
     policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  }
+
+  resource "aws_iam_role_policy_attachment" "spark_glue_access" {
+    role       = aws_iam_role.spark_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
   }
 
   resource "aws_iam_instance_profile" "spark_role_profile" {
