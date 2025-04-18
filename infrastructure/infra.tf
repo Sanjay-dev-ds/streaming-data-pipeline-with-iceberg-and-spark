@@ -156,7 +156,7 @@ provider "aws" {
                 echo "export SPARK_HOME=/opt/spark" | sudo tee -a /home/ubuntu/.bashrc
                 echo "export PATH=\$PATH:\$SPARK_HOME/bin" | sudo tee -a /home/ubuntu/.bashrc
 
-                cd /home/ubuntu
+                # clone the repository
                 git clone https://github.com/Sanjay-dev-ds/streaming-data-pipeline-with-iceberg-and-spark.git >> /tmp/user_data.log 2>&1
                 cd streaming-data-pipeline-with-iceberg-and-spark
 
