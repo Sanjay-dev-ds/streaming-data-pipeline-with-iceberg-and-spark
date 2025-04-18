@@ -10,7 +10,7 @@ logging.basicConfig(
 class Poller:
     def __init__(self, queue_url):
         self.queue_url = queue_url
-        self.sqs_client = boto3.client('sqs',region="us-east-1")
+        self.sqs_client = boto3.client('sqs')
         self.messages_to_delete = []
 
     def get_messages(self, batch_size):
