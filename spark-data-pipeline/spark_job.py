@@ -130,8 +130,6 @@ def process_message( messages,
 
 
 def create_spark_session(catalog_name, namespace, s3_bucket_arn, region="us-east-1"):
-    ACCESS_KEY = "AKIAQ3EGQBD2XUXM7WVF"
-    SECRET_KEY = "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"
 
     spark = SparkSession.builder \
         .appName("iceberg_lab") \
@@ -143,10 +141,11 @@ def create_spark_session(catalog_name, namespace, s3_bucket_arn, region="us-east
         .config(f"spark.sql.catalog.{catalog_name}.type", "glue") \
         .config(f"spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
         .config(f"spark.sql.catalog.dev.io-impl", "org.apache.iceberg.aws.s3.S3FileIO") \
-        .config("spark.hadoop.fs.s3a.access.key", "AKIAQ3EGQBD2XUXM7WVF") \
-        .config("spark.hadoop.fs.s3a.secret.key", "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") \
         .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
         .getOrCreate()
+
+    # .config("spark.hadoop.fs.s3a.access.key", f"{ACCESS_KEY}") \
+    # .config("spark.hadoop.fs.s3a.secret.key", f"{SECRET_KEY}") \
 
     spark.sql(f"CREATE NAMESPACE IF NOT EXISTS {catalog_name}.{namespace}")
     return spark

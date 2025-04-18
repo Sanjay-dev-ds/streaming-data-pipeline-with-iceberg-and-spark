@@ -8,7 +8,6 @@ import json
 import logging
 import boto3
 from faker import Faker
-from utility.cloudwatch_logger import log_exception
 
 # Set up logging
 logging.basicConfig(
@@ -95,4 +94,3 @@ if __name__ == "__main__":
             time.sleep(3)
     except Exception as e :
         print(e)
-        # log_exception()
