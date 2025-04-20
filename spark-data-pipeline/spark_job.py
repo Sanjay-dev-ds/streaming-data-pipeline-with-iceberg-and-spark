@@ -29,14 +29,14 @@ def load_data_to_iceberg(spark,
     full_table_name = f"{catalog_name}.{database_name}.{table_name}"
     try:
         if sql_query is not None:
-            print("IN sql_query")
+            logging.info("IN sql_query")
 
             # Create a temporary view
             df.createOrReplaceTempView("temp_view")
-            print("Created temp view ")
+            logging.info("Created temp view ")
             transformed_df = spark.sql(sql_query)
 
-            print("******transformed_df SCHEMA*********")
+            logging.info("******transformed_df SCHEMA*********")
             transformed_df.printSchema()
 
         else:
@@ -57,13 +57,13 @@ def load_data_to_iceberg(spark,
             writer = writer.partitionBy(partition_cols)
 
         if spark.catalog.tableExists(full_table_name):
-            print(f"Appending data to existing table {full_table_name}")
+            logging.info(f"Appending data to existing table {full_table_name}")
             writer.mode("append").saveAsTable(full_table_name)
         else:
-            print(f"Creating new table {full_table_name}")
+            logging.info(f"Creating new table {full_table_name}")
             writer.mode("overwrite").saveAsTable(full_table_name)
 
-        print(f"Data successfully written to {full_table_name}")
+        logging.info(f"Data successfully written to {full_table_name}")
 
         if sql_query:
             spark.catalog.dropTempView("temp_view")
@@ -71,7 +71,7 @@ def load_data_to_iceberg(spark,
         return True
 
     except Exception as e:
-        print(f"Error loading data to Iceberg: {str(e)}")
+        logging.error(f"Error loading data to Iceberg: {str(e)}")
         raise e
 
 
@@ -91,13 +91,10 @@ def process_message( messages,
             # Use .get() to safely access 'Records' and provide a default empty list
             records = payload.get('Records', [])
 
-            if records:  # Process only if records exist
-                for record in records:
-                    # Process each record
-                    print(record)
-            else:
-                print("No records found in payload, skipping message.")
+            if not records:  # Process only if records exist
+                logging.info("No records found in payload, skipping message.")
                 continue
+
             protocol = "s3a"
 
             if protocol == "s3a":
@@ -108,8 +105,10 @@ def process_message( messages,
                             records]
 
             batch_files.extend(s3_files)
-        print("batch_files")
-        print(batch_files)
+
+        logging.info("processing batch : ============================")
+        logging.info(file + '\n' for file in batch_files)
+        logging.info("==============================================================")
 
         if batch_files:
             multiline_df = spark.read.option("multiline", "false").json(batch_files)
