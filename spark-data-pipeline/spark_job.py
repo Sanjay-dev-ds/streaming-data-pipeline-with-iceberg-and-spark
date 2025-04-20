@@ -96,12 +96,7 @@ def process_message( messages,
                 continue
 
             protocol = "s3a"
-
-            if protocol == "s3a":
-                s3_files = [f"s3a://{record['s3']['bucket']['name']}/{record['s3']['object']['key']}" for record in
-                            records]
-            else:
-                s3_files = [f"s3://{record['s3']['bucket']['name']}/{record['s3']['object']['key']}" for record in
+            s3_files = [f"{protocol}://{record['s3']['bucket']['name']}/{record['s3']['object']['key']}" for record in
                             records]
 
             batch_files.extend(s3_files)
