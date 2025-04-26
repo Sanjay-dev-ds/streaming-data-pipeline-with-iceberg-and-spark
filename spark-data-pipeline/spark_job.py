@@ -102,7 +102,7 @@ def process_message( messages,
             batch_files.extend(s3_files)
 
         logging.info("processing batch : ============================")
-        logging.info(file + '\n' for file in batch_files)
+        logging.info(''.join(file + '\n' for file in batch_files))
         logging.info("==============================================================")
 
         if batch_files:
