@@ -15,7 +15,7 @@ class Poller:
 
     def get_messages(self, batch_size):
         logging.info("Polling messages from SQS queue")
-        logging.info(f"Waiting 20 seconds while polling")
+        # if there is no messages it will wait for 20 seconds
 
         response = self.sqs_client.receive_message(
             QueueUrl=self.queue_url,
