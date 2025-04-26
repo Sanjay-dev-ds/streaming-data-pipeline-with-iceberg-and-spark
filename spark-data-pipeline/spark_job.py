@@ -172,18 +172,17 @@ def main():
     while True:
         messages = poller.get_messages(10)
 
-        process_message(messages,
-                        spark,
-                        catalog_name,
-                        namespace,
-                        table_name,
-                        partition_cols,
-                        sql_query,
-                        compression
-                        )
-        poller.commit()
-        logging.info(f"Waiting 10 seconds before next poll")
-        time.sleep(10)
+        if messages:
+            process_message(messages,
+                            spark,
+                            catalog_name,
+                            namespace,
+                            table_name,
+                            partition_cols,
+                            sql_query,
+                            compression
+                            )
+            poller.commit()
 
 if __name__ == "__main__":
     main()

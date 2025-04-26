@@ -14,7 +14,9 @@ class Poller:
         self.messages_to_delete = []
 
     def get_messages(self, batch_size):
-        logging.info("Polling messages from SQS queue.")
+        logging.info("Polling messages from SQS queue")
+        logging.info(f"Waiting 20 seconds while polling")
+
         response = self.sqs_client.receive_message(
             QueueUrl=self.queue_url,
             MaxNumberOfMessages=batch_size,
